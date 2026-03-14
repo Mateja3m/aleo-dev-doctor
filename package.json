@@ -1,0 +1,58 @@
+{
+  "name": "@idoa/dev-doctor-aleo",
+  "version": "0.1.0",
+  "description": "Production-grade Aleo developer diagnostics, onboarding, and reliability toolkit.",
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "module",
+  "bin": {
+    "aleo-doctor": "dist/src/cli.js"
+  },
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "CONTRIBUTING.md"
+  ],
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist .vitest",
+    "dev": "tsx src/cli.ts",
+    "doctor": "tsx src/cli.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --check",
+    "format:write": "prettier . --write",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "demo:dev": "npm --prefix demo run dev",
+    "demo:build": "npm --prefix demo run build",
+    "demo:start": "npm --prefix demo run start"
+  },
+  "dependencies": {
+    "@idoa/dev-doctor-cli-kit": "^0.1.0",
+    "@idoa/dev-doctor-core": "^0.1.0",
+    "@idoa/dev-doctor-reporter": "^0.1.0",
+    "@idoa/dev-doctor-types": "^0.1.0",
+    "@idoa/dev-doctor-utils": "^0.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
+    "@typescript-eslint/parser": "^8.26.0",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.0",
+    "vitest": "^3.0.9"
+  }
+}
