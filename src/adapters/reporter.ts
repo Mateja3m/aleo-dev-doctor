@@ -29,8 +29,10 @@ export function formatReport(report: DoctorReport): string {
     }
   ).createTerminalReport;
 
+  const readinessLine = createReadinessLine(report);
+
   if (typeof createTerminalReport === 'function') {
-    return createTerminalReport({
+    const body = createTerminalReport({
       startedAt: report.generatedAt,
       finishedAt: report.generatedAt,
       durationMs: report.results.reduce((acc, item) => acc + item.durationMs, 0),
@@ -55,11 +57,16 @@ export function formatReport(report: DoctorReport): string {
         ]
       }))
     });
+
+    return `${readinessLine}\n${body}`;
   }
 
   const lines: string[] = [];
   lines.push(`Aleo Dev Doctor Report (${report.generatedAt})`);
-  lines.push(`Summary: ${report.summary.pass} pass, ${report.summary.warn} warn, ${report.summary.fail} fail`);
+  lines.push(readinessLine);
+  lines.push(
+    `Summary: ${report.summary.pass} pass, ${report.summary.warn} warn, ${report.summary.fail} fail, ${report.summary.skip} skip`
+  );
   lines.push('');
 
   for (const result of report.results) {
@@ -67,4 +74,16 @@ export function formatReport(report: DoctorReport): string {
   }
 
   return lines.join('\n');
+}
+
+function createReadinessLine(report: DoctorReport): string {
+  if (report.summary.fail > 0) {
+    return 'Aleo zero-knowledge development readiness: blocked by failing checks.';
+  }
+
+  if (report.summary.warn > 0) {
+    return 'Aleo zero-knowledge development readiness: partially ready, with follow-up actions.';
+  }
+
+  return 'Aleo zero-knowledge development readiness: ready.';
 }

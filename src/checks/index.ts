@@ -3,15 +3,15 @@ import type { CommandInput, DoctorCheck } from '../domain.js';
 import { configCheck } from './config.check.js';
 import { leoCheck, nodeVersionCheck, npmCheck, snarkosCheck } from './env.checks.js';
 import { networkReachabilityCheck } from './network.check.js';
-import { walletEnvCheck } from './wallet.check.js';
-import { workflowBaselineCheck } from './workflow.check.js';
+import { accountReadinessCheck } from './wallet.check.js';
+import { workflowCompileCheck, workflowExecuteCheck } from './workflow.check.js';
 
 const checksByCommand: Record<CommandInput['command'], DoctorCheck[]> = {
   env: [nodeVersionCheck, npmCheck, leoCheck, snarkosCheck],
   config: [configCheck],
   network: [networkReachabilityCheck],
-  wallet: [walletEnvCheck],
-  workflow: [workflowBaselineCheck],
+  wallet: [accountReadinessCheck],
+  workflow: [workflowCompileCheck, workflowExecuteCheck],
   report: [
     nodeVersionCheck,
     npmCheck,
@@ -19,8 +19,9 @@ const checksByCommand: Record<CommandInput['command'], DoctorCheck[]> = {
     snarkosCheck,
     configCheck,
     networkReachabilityCheck,
-    walletEnvCheck,
-    workflowBaselineCheck
+    accountReadinessCheck,
+    workflowCompileCheck,
+    workflowExecuteCheck
   ]
 };
 

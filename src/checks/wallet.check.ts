@@ -1,45 +1,62 @@
 import type { DoctorCheck } from '../domain.js';
 import { createResult } from '../domain.js';
 
-import { loadAleoDoctorConfig } from '../config/load-config.js';
+import { getConfigOrError } from './helpers.js';
 
-const PLACEHOLDER_PRIVATE_KEY_PATTERN = /^A(?:PrivateKey|ViewKey|Address)[A-Za-z0-9_]{10,}$/;
-
-export const walletEnvCheck: DoctorCheck = {
-  id: 'wallet.env',
-  title: 'Wallet environment assumptions',
-  category: 'wallet',
-  description: 'Checks if configured wallet environment variable exists and has expected shape.',
+export const accountReadinessCheck: DoctorCheck = {
+  id: 'aleo.account.readiness',
+  title: 'Aleo account readiness',
+  category: 'account',
+  description: 'Checks whether the expected Aleo account environment variables are configured.',
   async run(context) {
     const startedAt = Date.now();
-    const config = loadAleoDoctorConfig(context.cwd, context.configPath);
-    const keyName = config.wallet.privateKeyEnvVar;
-    const value = process.env[keyName];
 
-    if (!value) {
+    try {
+      const config = getConfigOrError(context);
+      const privateKeyEnvVar = config.account.privateKeyEnvVar;
+      const addressEnvVar = config.account.addressEnvVar;
+      const viewKeyEnvVar = config.account.viewKeyEnvVar;
+
+      const hasPrivateKey = Boolean(process.env[privateKeyEnvVar]);
+      const hasAddress = Boolean(process.env[addressEnvVar]);
+      const hasViewKey = viewKeyEnvVar ? Boolean(process.env[viewKeyEnvVar]) : undefined;
+
+      const missing = [!hasPrivateKey ? privateKeyEnvVar : null, !hasAddress ? addressEnvVar : null].filter(Boolean);
+
+      if (missing.length > 0) {
+        return createResult(
+          'aleo.account.readiness',
+          'warn',
+          `Aleo account configuration is incomplete. Missing ${missing.join(', ')}.`,
+          Date.now() - startedAt,
+          {
+            privateKeyEnvVar,
+            addressEnvVar,
+            viewKeyEnvVar: viewKeyEnvVar ?? null,
+            hasPrivateKey,
+            hasAddress,
+            hasViewKey: hasViewKey ?? null
+          }
+        );
+      }
+
       return createResult(
-        'wallet.env',
-        'warn',
-        `Environment variable ${keyName} is not set.`,
+        'aleo.account.readiness',
+        'pass',
+        'Aleo account configuration is present for privacy-first app development.',
         Date.now() - startedAt,
         {
-          todo: 'Add secure wallet-provider integration for stronger validation.'
+          privateKeyEnvVar,
+          addressEnvVar,
+          viewKeyEnvVar: viewKeyEnvVar ?? null,
+          hasPrivateKey,
+          hasAddress,
+          hasViewKey: hasViewKey ?? null
         }
       );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Aleo configuration is unavailable.';
+      return createResult('aleo.account.readiness', 'fail', message, Date.now() - startedAt);
     }
-
-    if (!PLACEHOLDER_PRIVATE_KEY_PATTERN.test(value)) {
-      return createResult(
-        'wallet.env',
-        'warn',
-        `${keyName} is set but format does not match placeholder Aleo pattern.`,
-        Date.now() - startedAt,
-        {
-          todo: 'Replace placeholder format validation with canonical Aleo key parser.'
-        }
-      );
-    }
-
-    return createResult('wallet.env', 'pass', `${keyName} is present.`, Date.now() - startedAt);
   }
 };

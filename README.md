@@ -1,61 +1,78 @@
 # Aleo Dev Doctor
 
-Open-source diagnostics and onboarding toolkit for Aleo developers.
+Open-source diagnostics toolkit for validating Aleo zero-knowledge development environments.
+
+`aleo-doctor` helps developers building privacy-first Aleo apps verify that their local toolchain, RPC access, account configuration, and Leo workflow setup are ready before they lose time on avoidable environment issues.
 
 ## Problem
 
-Aleo developers need a fast way to verify local setup, endpoint reachability, and baseline workflow readiness without manually debugging each layer.
+Aleo onboarding is not just about installing Node.js and running a template.
 
-## Solution
+Zero-knowledge developers typically need to validate multiple layers before productive work can start:
 
-`@idoa/dev-doctor-aleo` provides a CLI that runs lightweight, safe diagnostics for:
-- local environment
-- configuration validity
-- network connectivity
-- wallet/account assumptions
-- baseline workflow readiness (placeholder extension point)
+- the Leo compiler must be available
+- `snarkos` should be installed for protocol-adjacent local workflows
+- RPC access must point at a valid Aleo endpoint
+- account-related environment variables must be present without leaking secrets
+- compile and execution workflows need at least a baseline readiness check
 
-It outputs both human-readable terminal summaries and JSON reports.
+Without a focused validator, new Aleo developers end up debugging shell paths, malformed config, missing account variables, and broken workflow assumptions one issue at a time.
 
-Shared dependencies are consumed as published npm packages (`@idoa/dev-doctor-*`), not local workspace shims.
+## Why Aleo Developers Need This
 
-## Features
+`aleo-doctor` is positioned as a developer enablement tool for the Aleo ecosystem:
 
-- TypeScript-first CLI (`aleo-doctor`)
-- Aleo-specific check registry
-- zod-based config validation
-- structured report model
-- terminal and JSON output modes
-- minimal Next.js + MUI demo for proposal walkthroughs
+- speeds up zero-knowledge developer onboarding
+- reduces setup friction for Leo and snarkOS-based workflows
+- creates a consistent readiness report for local environments and demos
+- supports privacy-first application teams that want safe diagnostics without exposing secrets
+- provides a clean adapter layer that can grow into deeper Aleo workflow validation over time
 
-## CLI Commands
+## Aleo Stack Validation
 
-When the package is published, commands are available via:
+The CLI keeps the existing TypeScript-first adapter architecture and adds explicit Aleo-native checks.
+
+Supported checks today:
+
+- `aleo.env.node`: Node.js runtime compatibility
+- `aleo.env.npm`: npm availability for package installation and demo setup
+- `aleo.toolchain.leo`: Leo compiler detection and version capture
+- `aleo.toolchain.snarkos`: snarkOS detection and version capture
+- `aleo.config.schema`: Aleo-specific config parsing and defaults validation
+- `aleo.network.rpc`: RPC URL validation and lightweight reachability test
+- `aleo.account.readiness`: account environment readiness without exposing secrets
+- `aleo.workflow.compile`: fixture-driven Leo compile validation with safe mock mode
+- `aleo.workflow.execute`: lightweight execution workflow extension point
+
+## CLI Usage
+
+Published usage:
 
 ```bash
-npx @idoa/dev-doctor-aleo env
+npx @idoa/dev-doctor-aleo report
 ```
 
-Before publish, run commands locally from this repository:
+Local usage in this repository:
 
 ```bash
+npm install
 npm run doctor -- env
-npm run doctor -- config
-npm run doctor -- network
-npm run doctor -- wallet
-npm run doctor -- workflow
 npm run doctor -- report
 npm run doctor -- report --json
+npm run doctor -- workflow
 ```
 
-Or link the local binary:
+Linked binary usage:
 
 ```bash
 npm link
 aleo-doctor env
+aleo-doctor report
+aleo-doctor report --json
+aleo-doctor workflow
 ```
 
-The command set is:
+## Example Commands
 
 ```bash
 aleo-doctor env
@@ -67,80 +84,165 @@ aleo-doctor report
 aleo-doctor report --json
 ```
 
-## Example Output
-
-Plain text:
+## Example Terminal Output
 
 ```text
-Aleo Dev Doctor Report (2026-03-11T12:00:00.000Z)
-Summary: 5 pass, 2 warn, 0 fail
+Aleo zero-knowledge development readiness: partially ready, with follow-up actions.
+Aleo Dev Doctor Report (2026-03-15T10:00:00.000Z)
+Summary: 6 pass, 3 warn, 0 fail, 0 skip
 
-- [PASS] env.node: Node.js 22.0.0 is supported.
-- [PASS] config.base: Configuration is valid.
-- [WARN] workflow.baseline: Workflow baseline validated with lightweight checks. Deep protocol workflow validation is a planned extension.
+- [PASS] aleo.env.node: Node.js 22.14.0 is ready for Aleo developer tooling.
+- [PASS] aleo.toolchain.leo: leo detected and ready: leo 1.12.0.
+- [PASS] aleo.toolchain.snarkos: snarkos detected and ready: snarkos 3.3.1.
+- [PASS] aleo.network.rpc: Aleo testnet RPC endpoint is reachable.
+- [PASS] aleo.account.readiness: Aleo account configuration is present for privacy-first app development.
+- [WARN] aleo.workflow.execute: Execution workflow validation is a documented extension point. Use mock mode or add a project-specific runner.
 ```
 
-JSON:
+## Example JSON Output
 
 ```json
 {
   "chain": "aleo",
-  "generatedAt": "2026-03-11T12:00:00.000Z",
+  "generatedAt": "2026-03-15T10:00:00.000Z",
   "summary": {
-    "pass": 5,
-    "warn": 2,
+    "pass": 6,
+    "warn": 3,
     "fail": 0,
     "skip": 0,
-    "total": 7
+    "total": 9
   },
   "results": [
     {
-      "checkId": "workflow.baseline",
-      "status": "warn",
-      "message": "Workflow baseline validated with lightweight checks. Deep protocol workflow validation is a planned extension.",
-      "durationMs": 18,
+      "checkId": "aleo.toolchain.leo",
+      "status": "pass",
+      "message": "leo detected and ready: leo 1.12.0.",
+      "durationMs": 14,
       "details": {
-        "placeholder": true
+        "command": "leo",
+        "configuredBinaryPath": null,
+        "version": "leo 1.12.0"
+      }
+    },
+    {
+      "checkId": "aleo.account.readiness",
+      "status": "pass",
+      "message": "Aleo account configuration is present for privacy-first app development.",
+      "durationMs": 2,
+      "details": {
+        "privateKeyEnvVar": "ALEO_PRIVATE_KEY",
+        "addressEnvVar": "ALEO_ADDRESS",
+        "viewKeyEnvVar": "ALEO_VIEW_KEY",
+        "hasPrivateKey": true,
+        "hasAddress": true,
+        "hasViewKey": false
+      }
+    },
+    {
+      "checkId": "aleo.workflow.compile",
+      "status": "warn",
+      "message": "Leo fixture is present, but the Leo compiler is not installed. Compile readiness is blocked.",
+      "durationMs": 5,
+      "details": {
+        "fixturePath": "examples/aleo-workflow",
+        "command": "leo build",
+        "configuredBinaryPath": null
       }
     }
   ]
 }
 ```
 
-## Architecture
+## Configuration
 
-This repository is the Aleo adapter layer on top of shared packages:
-- `@idoa/dev-doctor-core`
-- `@idoa/dev-doctor-types`
-- `@idoa/dev-doctor-utils`
-- `@idoa/dev-doctor-reporter`
-- `@idoa/dev-doctor-cli-kit`
+Default config values are Aleo-specific and safe to override.
 
-Wrapper responsibilities in this repo:
-- Aleo check composition
-- Aleo config defaults/schema
-- CLI command routing
-- proposal-focused demo and docs
+Example `aleo-doctor.config.json`:
 
+```json
+{
+  "chain": "aleo",
+  "network": {
+    "name": "testnet",
+    "rpcUrl": "https://api.explorer.aleo.org/v1",
+    "timeoutMs": 5000
+  },
+  "toolchain": {
+    "leoBinaryPath": "leo",
+    "snarkosBinaryPath": "snarkos"
+  },
+  "account": {
+    "privateKeyEnvVar": "ALEO_PRIVATE_KEY",
+    "addressEnvVar": "ALEO_ADDRESS",
+    "viewKeyEnvVar": "ALEO_VIEW_KEY"
+  },
+  "workflow": {
+    "fixturePath": "examples/aleo-workflow",
+    "compileArgs": ["build"],
+    "executionMode": "placeholder"
+  }
+}
+```
 
-## Current PoC Status
-
-- working CLI commands and report output
-- test coverage for registration/config/command/report behavior
-- demo app for value explanation and sample reports
-
-
-## Local Setup
+Environment variables:
 
 ```bash
-npm install
+ALEO_RPC_URL=https://api.explorer.aleo.org/v1
+ALEO_NETWORK=testnet
+ALEO_PRIVATE_KEY=...
+ALEO_ADDRESS=...
+ALEO_VIEW_KEY=...
+ALEO_DOCTOR_MOCK_COMPILE=pass
+ALEO_DOCTOR_MOCK_EXECUTE=pass
+```
+
+## Fixture Example
+
+[`examples/aleo-workflow/`](/Users/milanmatejic/Desktop/personal/Projects/aleo-dev-doctor/examples/aleo-workflow/README.md) is a minimal Aleo workflow fixture that uses a Leo sample program for `aleo.workflow.compile`.
+
+Expected command:
+
+```bash
+leo build
+```
+
+If real compilation is too heavy or unavailable in CI, the workflow checks support safe mockable modes through:
+
+- `ALEO_DOCTOR_MOCK_COMPILE=pass|fail`
+- `ALEO_DOCTOR_MOCK_EXECUTE=pass|fail`
+
+## Current Limitations
+
+- RPC reachability is lightweight and does not yet validate deeper Aleo protocol semantics.
+- The execution workflow check is intentionally a placeholder extension point, not a full transaction runner.
+- The fixture example is meant for readiness validation, not for managing full Leo project lifecycles.
+- Secret material is never printed, but the tool currently validates presence rather than cryptographic correctness.
+
+## Grant-Aligned Roadmap
+
+- add deeper Leo project introspection and richer compile diagnostics
+- expand snarkOS validation for local node scenarios without turning this project into a node manager
+- support project-specific execution validators for privacy app teams
+- add more ecosystem-specific checks for prover inputs, endpoint expectations, and CI onboarding
+- publish the package and demo as an open-source Aleo developer onboarding utility
+
+## Open Source Links
+
+- npm package: `TODO`
+- demo app: `TODO`
+- documentation: [docs/README.md](/Users/milanmatejic/Desktop/personal/Projects/aleo-dev-doctor/docs/README.md)
+- repository: [github.com/Mateja3m/aleo-dev-doctor](https://github.com/Mateja3m/aleo-dev-doctor)
+
+## Local Development
+
+```bash
 npm run build
 npm run lint
 npm run test
 npm run typecheck
 ```
 
-## Demo
+Demo app:
 
 ```bash
 npm --prefix demo install

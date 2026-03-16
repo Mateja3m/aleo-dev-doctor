@@ -13,6 +13,30 @@ describe('config validation', () => {
       const config = loadAleoDoctorConfig(cwd);
       expect(config.chain).toBe('aleo');
       expect(config.network.rpcUrl.length).toBeGreaterThan(0);
+      expect(config.workflow.fixturePath).toBe('examples/aleo-workflow');
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it('merges partial Aleo config files with defaults', () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), 'aleo-doctor-partial-'));
+    const configPath = path.join(cwd, 'aleo-doctor.config.json');
+
+    try {
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          network: { name: 'mainnet', rpcUrl: 'https://example.com/rpc' },
+          workflow: { compileArgs: ['build'] }
+        })
+      );
+
+      const config = loadAleoDoctorConfig(cwd);
+      expect(config.network.name).toBe('mainnet');
+      expect(config.network.timeoutMs).toBe(5000);
+      expect(config.account.privateKeyEnvVar).toBe('ALEO_PRIVATE_KEY');
+      expect(config.workflow.fixturePath).toBe('examples/aleo-workflow');
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -28,7 +52,7 @@ describe('config validation', () => {
         JSON.stringify({
           chain: 'aleo',
           network: { rpcUrl: 'not-url', timeoutMs: -1 },
-          wallet: { privateKeyEnvVar: '' }
+          account: { privateKeyEnvVar: '', addressEnvVar: '' }
         })
       );
 

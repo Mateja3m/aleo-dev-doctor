@@ -8,7 +8,7 @@ describe('report formatting', () => {
   it('formats a readable terminal report', () => {
     const results: DoctorCheckResult[] = [
       {
-        checkId: 'env.node',
+        checkId: 'aleo.env.node',
         status: 'pass',
         message: 'ok',
         durationMs: 10
@@ -19,6 +19,7 @@ describe('report formatting', () => {
     const text = toTerminalReport(report);
 
     expect(text).toContain('Report');
-    expect(text).toContain('env.node');
+    expect(text).toContain('Aleo zero-knowledge development readiness');
+    expect(text).toContain('aleo.env.node');
   });
 });

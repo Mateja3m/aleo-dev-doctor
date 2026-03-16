@@ -4,12 +4,24 @@ export type { CheckStatus };
 
 export interface AleoDoctorConfig {
   chain: 'aleo';
+  toolchain: {
+    leoBinaryPath?: string | undefined;
+    snarkosBinaryPath?: string | undefined;
+  };
   network: {
+    name: string;
     rpcUrl: string;
     timeoutMs: number;
   };
-  wallet: {
+  account: {
     privateKeyEnvVar: string;
+    addressEnvVar: string;
+    viewKeyEnvVar?: string | undefined;
+  };
+  workflow: {
+    fixturePath: string;
+    compileArgs: string[];
+    executionMode: 'placeholder' | 'mock';
   };
 }
 
@@ -42,6 +54,8 @@ export interface DoctorContext {
   cwd: string;
   configPath?: string;
   requestTimeoutMs: number;
+  config?: AleoDoctorConfig;
+  configError?: string;
 }
 
 export interface DoctorCheck {

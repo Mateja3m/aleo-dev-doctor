@@ -1,22 +1,25 @@
 import type { DoctorCheck } from '../domain.js';
 import { createResult } from '../domain.js';
 
-import { loadAleoDoctorConfig } from '../config/load-config.js';
 import { retry } from '../adapters/utils.js';
+import { getConfigOrError } from './helpers.js';
 
 export const networkReachabilityCheck: DoctorCheck = {
-  id: 'network.rpc',
+  id: 'aleo.network.rpc',
   title: 'RPC reachability',
   category: 'network',
-  description: 'Checks if the configured Aleo RPC endpoint responds.',
+  description: 'Checks if the configured Aleo RPC endpoint is valid and reachable.',
   async run(context) {
     const startedAt = Date.now();
-    const config = loadAleoDoctorConfig(context.cwd, context.configPath);
 
     try {
+      const config = getConfigOrError(context);
+      const rpcUrl = config.network.rpcUrl;
+      const parsedUrl = new URL(rpcUrl);
+
       const response = await retry(
         () =>
-          fetch(config.network.rpcUrl, {
+          fetch(parsedUrl, {
             method: 'GET',
             signal: AbortSignal.timeout(context.requestTimeoutMs)
           }),
@@ -24,21 +27,41 @@ export const networkReachabilityCheck: DoctorCheck = {
       );
 
       if (response.ok) {
-        return createResult('network.rpc', 'pass', 'RPC endpoint is reachable.', Date.now() - startedAt, {
-          url: config.network.rpcUrl,
-          status: response.status
-        });
+        return createResult(
+          'aleo.network.rpc',
+          'pass',
+          `Aleo ${config.network.name} RPC endpoint is reachable.`,
+          Date.now() - startedAt,
+          {
+            network: config.network.name,
+            url: rpcUrl,
+            status: response.status,
+            reachable: true
+          }
+        );
       }
 
-      return createResult('network.rpc', 'warn', `RPC responded with status ${response.status}.`, Date.now() - startedAt, {
-        url: config.network.rpcUrl,
-        status: response.status
-      });
+      return createResult(
+        'aleo.network.rpc',
+        'warn',
+        `Aleo ${config.network.name} RPC responded with status ${response.status}.`,
+        Date.now() - startedAt,
+        {
+          network: config.network.name,
+          url: rpcUrl,
+          status: response.status,
+          reachable: true
+        }
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : 'RPC request failed.';
-      return createResult('network.rpc', 'fail', `RPC endpoint check failed: ${message}`, Date.now() - startedAt, {
-        url: config.network.rpcUrl
-      });
+
+      return createResult(
+        'aleo.network.rpc',
+        'fail',
+        `Aleo RPC validation failed: ${message}`,
+        Date.now() - startedAt
+      );
     }
   }
 };

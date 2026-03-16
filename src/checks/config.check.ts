@@ -1,25 +1,35 @@
 import type { DoctorCheck } from '../domain.js';
 import { createResult } from '../domain.js';
 
-import { loadAleoDoctorConfig } from '../config/load-config.js';
+import { getConfigOrError } from './helpers.js';
 
 export const configCheck: DoctorCheck = {
-  id: 'config.base',
-  title: 'Config validation',
+  id: 'aleo.config.schema',
+  title: 'Aleo config validation',
   category: 'config',
-  description: 'Loads and validates Aleo Doctor configuration.',
+  description: 'Loads and validates Aleo zero-knowledge developer environment configuration.',
   async run(context) {
     const startedAt = Date.now();
 
     try {
-      const config = loadAleoDoctorConfig(context.cwd, context.configPath);
-      return createResult('config.base', 'pass', 'Configuration is valid.', Date.now() - startedAt, {
-        rpcUrl: config.network.rpcUrl,
-        timeoutMs: config.network.timeoutMs
-      });
+      const config = getConfigOrError(context);
+      return createResult(
+        'aleo.config.schema',
+        'pass',
+        'Aleo developer configuration is valid.',
+        Date.now() - startedAt,
+        {
+          network: config.network.name,
+          rpcUrl: config.network.rpcUrl,
+          timeoutMs: config.network.timeoutMs,
+          fixturePath: config.workflow.fixturePath,
+          leoBinaryPath: config.toolchain.leoBinaryPath ?? null,
+          snarkosBinaryPath: config.toolchain.snarkosBinaryPath ?? null
+        }
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Configuration could not be parsed.';
-      return createResult('config.base', 'fail', message, Date.now() - startedAt);
+      return createResult('aleo.config.schema', 'fail', message, Date.now() - startedAt);
     }
   }
 };

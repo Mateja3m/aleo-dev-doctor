@@ -1,7 +1,7 @@
 {
   "name": "@idoa/dev-doctor-aleo",
   "version": "0.1.0",
-  "description": "Production-grade Aleo developer diagnostics, onboarding, and reliability toolkit.",
+  "description": "Open-source diagnostics toolkit for validating Aleo zero-knowledge development environments.",
   "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "bin": {
@@ -9,6 +9,25 @@
   },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
+  "homepage": "https://github.com/Mateja3m/aleo-dev-doctor",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mateja3m/aleo-dev-doctor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Mateja3m/aleo-dev-doctor/issues"
+  },
+  "keywords": [
+    "aleo",
+    "zero-knowledge",
+    "zk",
+    "leo",
+    "snarkos",
+    "cli",
+    "developer-tooling",
+    "diagnostics",
+    "privacy-apps"
+  ],
   "files": [
     "dist",
     "README.md",
