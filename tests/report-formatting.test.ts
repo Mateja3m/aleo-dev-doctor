@@ -19,7 +19,10 @@ describe('report formatting', () => {
     const text = toTerminalReport(report);
 
     expect(text).toContain('Report');
+    expect(text).toContain('Aleo Dev Doctor Report');
+    expect(text).not.toContain('Chain Dev Doctor Report');
     expect(text).toContain('Aleo zero-knowledge development readiness');
+    expect(text).toContain('ZK readiness');
     expect(text).toContain('aleo.env.node');
   });
 });

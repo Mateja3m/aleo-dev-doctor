@@ -1,0 +1,6 @@
+{
+  "command": "leo run main 5u32",
+  "expectedOutput": "10u32",
+  "proofMode": "mock",
+  "verificationMode": "mock"
+}

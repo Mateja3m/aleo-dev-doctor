@@ -1,6 +1,0 @@
-{
-  "program": "hello.aleo",
-  "version": "0.1.0",
-  "description": "Minimal Leo fixture for Aleo Dev Doctor workflow validation.",
-  "license": "MIT"
-}

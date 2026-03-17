@@ -21,6 +21,7 @@ export const aleoDoctorConfigSchema = z.object({
   workflow: z.object({
     fixturePath: z.string().min(1),
     compileArgs: z.array(z.string().min(1)).min(1),
+    runArgs: z.array(z.string().min(1)).min(1),
     executionMode: z.enum(['placeholder', 'mock'])
   })
 });
@@ -54,6 +55,7 @@ export const aleoDoctorPartialConfigSchema = z.object({
     .object({
       fixturePath: z.string().min(1),
       compileArgs: z.array(z.string().min(1)).min(1),
+      runArgs: z.array(z.string().min(1)).min(1),
       executionMode: z.enum(['placeholder', 'mock'])
     })
     .partial()

@@ -1,8 +1,8 @@
 {
   "name": "@idoa/dev-doctor-aleo",
   "version": "0.1.0",
-  "description": "Open-source diagnostics toolkit for validating Aleo zero-knowledge development environments.",
-  "license": "SEE LICENSE IN LICENSE",
+  "description": "Aleo ZK Development Readiness Validator for Leo, snarkOS, and privacy app workflows.",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "aleo-doctor": "dist/src/cli.js"
@@ -30,7 +30,7 @@
   ],
   "files": [
     "dist",
-    "examples",
+    "fixtures",
     "README.md",
     "LICENSE",
     "SECURITY.md",
@@ -40,7 +40,7 @@
     "node": ">=18.18.0"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
     "clean": "rm -rf dist .vitest",
     "dev": "tsx src/cli.ts",
     "doctor": "tsx src/cli.ts",

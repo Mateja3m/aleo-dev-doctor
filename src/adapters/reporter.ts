@@ -58,7 +58,9 @@ export function formatReport(report: DoctorReport): string {
       }))
     });
 
-    return `${readinessLine}\n${body}`;
+    return normalizeSharedTerminalReport(
+      `${readinessLine}\nZK readiness: compile=${report.zkReadiness.compile} execute=${report.zkReadiness.execution} proof=${report.zkReadiness.proof} verify=${report.zkReadiness.verification}\n${body}`
+    );
   }
 
   const lines: string[] = [];
@@ -66,6 +68,9 @@ export function formatReport(report: DoctorReport): string {
   lines.push(readinessLine);
   lines.push(
     `Summary: ${report.summary.pass} pass, ${report.summary.warn} warn, ${report.summary.fail} fail, ${report.summary.skip} skip`
+  );
+  lines.push(
+    `ZK readiness: compile=${report.zkReadiness.compile} execute=${report.zkReadiness.execution} proof=${report.zkReadiness.proof} verify=${report.zkReadiness.verification}`
   );
   lines.push('');
 
@@ -86,4 +91,8 @@ function createReadinessLine(report: DoctorReport): string {
   }
 
   return 'Aleo zero-knowledge development readiness: ready.';
+}
+
+function normalizeSharedTerminalReport(text: string): string {
+  return text.replace('Chain Dev Doctor Report', 'Aleo Dev Doctor Report');
 }

@@ -32,33 +32,49 @@ describe('command behavior', () => {
     expect(parsed?.command).toBe('workflow');
   });
 
-  it('returns Aleo-specific workflow checks in JSON reports', async () => {
-    process.env.ALEO_DOCTOR_MOCK_COMPILE = 'pass';
+  it('parses zk command', () => {
+    const parsed = parseCommandInput(['node', 'aleo-doctor', 'zk']);
+    expect(parsed?.command).toBe('zk');
+  });
+
+  it('returns ZK workflow checks in JSON reports', async () => {
     process.env.ALEO_DOCTOR_MOCK_EXECUTE = 'pass';
+    process.env.ALEO_DOCTOR_MOCK_PROOF = 'pass';
+    process.env.ALEO_DOCTOR_MOCK_VERIFY = 'pass';
 
     try {
       const result = await runDoctorCommand({
-        command: 'workflow',
+        command: 'zk',
         flags: { json: true }
       });
 
       const parsed = JSON.parse(result.text) as {
+        zkReadiness: Record<string, string>;
+        layers: Record<string, Array<{ checkId: string; status: string }>>;
         results: Array<{ checkId: string; status: string; details?: Record<string, unknown> }>;
       };
 
       expect(parsed.results.map((item) => item.checkId)).toEqual([
-        'aleo.workflow.compile',
-        'aleo.workflow.execute'
+        'aleo.zk.execute',
+        'aleo.zk.proof',
+        'aleo.zk.verify'
       ]);
       expect(parsed.results.every((item) => item.status === 'pass')).toBe(true);
+      expect(parsed.zkReadiness).toMatchObject({
+        execution: 'pass',
+        proof: 'pass',
+        verification: 'pass'
+      });
+      expect(parsed.layers.zk).toHaveLength(3);
     } finally {
-      delete process.env.ALEO_DOCTOR_MOCK_COMPILE;
       delete process.env.ALEO_DOCTOR_MOCK_EXECUTE;
+      delete process.env.ALEO_DOCTOR_MOCK_PROOF;
+      delete process.env.ALEO_DOCTOR_MOCK_VERIFY;
     }
   });
 
   it('keeps account readiness JSON details secret-safe', async () => {
-    process.env.ALEO_PRIVATE_KEY = 'super-secret';
+    process.env.ALEO_PRIVATE_KEY = 'APrivateKey1ABCDEFGHIJKLMNOPQRSTUV';
     process.env.ALEO_ADDRESS = 'aleo1address';
 
     try {
@@ -71,17 +87,30 @@ describe('command behavior', () => {
         results: Array<{ checkId: string; details?: Record<string, unknown> }>;
       };
 
-      expect(parsed.results[0]?.checkId).toBe('aleo.account.readiness');
+      expect(parsed.results[0]?.checkId).toBe('aleo.account.private_key');
       expect(parsed.results[0]?.details).toMatchObject({
-        hasPrivateKey: true,
-        hasAddress: true,
         privateKeyEnvVar: 'ALEO_PRIVATE_KEY',
-        addressEnvVar: 'ALEO_ADDRESS'
+        present: true
       });
-      expect(result.text).not.toContain('super-secret');
+      expect(result.text).not.toContain('APrivateKey1ABCDEFGHIJKLMNOPQRSTUV');
     } finally {
       delete process.env.ALEO_PRIVATE_KEY;
       delete process.env.ALEO_ADDRESS;
     }
+  });
+
+  it('keeps zk verify at warn when compiled artifacts are missing', async () => {
+    const result = await runDoctorCommand({
+      command: 'zk',
+      flags: { json: true }
+    });
+
+    const parsed = JSON.parse(result.text) as {
+      zkReadiness: Record<string, string>;
+      results: Array<{ checkId: string; status: string }>;
+    };
+
+    expect(parsed.zkReadiness.verification).toBe('warn');
+    expect(parsed.results.find((item) => item.checkId === 'aleo.zk.verify')?.status).toBe('warn');
   });
 });

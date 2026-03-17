@@ -1,27 +1,35 @@
 import type { CommandInput, DoctorCheck } from '../domain.js';
 
+import { accountPrivateKeyCheck, accountTransactionReadinessCheck } from './account.check.js';
 import { configCheck } from './config.check.js';
-import { leoCheck, nodeVersionCheck, npmCheck, snarkosCheck } from './env.checks.js';
-import { networkReachabilityCheck } from './network.check.js';
-import { accountReadinessCheck } from './wallet.check.js';
-import { workflowCompileCheck, workflowExecuteCheck } from './workflow.check.js';
+import { nodeVersionCheck, npmCheck } from './env.checks.js';
+import { leoBuildCheck, leoRunCheck, leoVersionCheck } from './leo.check.js';
+import { programArtifactScanCheck } from './program.check.js';
+import { snarkosRpcCheck, snarkosToolchainCheck } from './snarkos.check.js';
+import { zkExecuteCheck, zkProofCheck, zkVerifyCheck } from './zk-workflow.check.js';
 
 const checksByCommand: Record<CommandInput['command'], DoctorCheck[]> = {
-  env: [nodeVersionCheck, npmCheck, leoCheck, snarkosCheck],
+  env: [nodeVersionCheck, npmCheck, leoVersionCheck, snarkosToolchainCheck],
   config: [configCheck],
-  network: [networkReachabilityCheck],
-  wallet: [accountReadinessCheck],
-  workflow: [workflowCompileCheck, workflowExecuteCheck],
+  network: [snarkosRpcCheck],
+  wallet: [accountPrivateKeyCheck, accountTransactionReadinessCheck],
+  workflow: [leoBuildCheck, leoRunCheck, zkExecuteCheck, zkProofCheck, zkVerifyCheck, programArtifactScanCheck],
+  zk: [zkExecuteCheck, zkProofCheck, zkVerifyCheck],
   report: [
     nodeVersionCheck,
     npmCheck,
-    leoCheck,
-    snarkosCheck,
     configCheck,
-    networkReachabilityCheck,
-    accountReadinessCheck,
-    workflowCompileCheck,
-    workflowExecuteCheck
+    leoVersionCheck,
+    leoBuildCheck,
+    leoRunCheck,
+    zkExecuteCheck,
+    zkProofCheck,
+    zkVerifyCheck,
+    snarkosToolchainCheck,
+    snarkosRpcCheck,
+    accountPrivateKeyCheck,
+    accountTransactionReadinessCheck,
+    programArtifactScanCheck,
   ]
 };
 

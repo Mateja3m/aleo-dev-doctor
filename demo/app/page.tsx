@@ -3,59 +3,106 @@ import { Alert, Box, Chip, Container, Paper, Stack, Typography } from '@mui/mate
 const checks = [
   'aleo.env.node',
   'aleo.env.npm',
-  'aleo.toolchain.leo',
-  'aleo.toolchain.snarkos',
+  'aleo.leo.version',
+  'aleo.leo.build',
+  'aleo.leo.run',
   'aleo.config.schema',
-  'aleo.network.rpc',
-  'aleo.account.readiness',
-  'aleo.workflow.compile',
-  'aleo.workflow.execute'
+  'aleo.zk.execute',
+  'aleo.zk.proof',
+  'aleo.zk.verify',
+  'aleo.snarkos.binary',
+  'aleo.snarkos.rpc',
+  'aleo.account.private_key',
+  'aleo.account.transaction',
+  'aleo.program.artifacts'
 ];
 
-const plainTextReport = `Aleo zero-knowledge development readiness: partially ready, with follow-up actions.\nAleo Dev Doctor Report (2026-03-16T10:00:00.000Z)\nSummary: 6 pass, 3 warn, 0 fail, 0 skip\n\n- [PASS] aleo.env.node: Node.js 22.14.0 is ready for Aleo developer tooling.\n- [PASS] aleo.toolchain.leo: leo detected and ready: leo 1.12.0.\n- [PASS] aleo.toolchain.snarkos: snarkos detected and ready: snarkos 3.3.1.\n- [PASS] aleo.network.rpc: Aleo testnet RPC endpoint is reachable.\n- [WARN] aleo.account.readiness: Aleo account configuration is incomplete. Missing ALEO_PRIVATE_KEY, ALEO_ADDRESS.\n- [WARN] aleo.workflow.compile: Leo fixture is present, but the Leo compiler is not installed. Compile readiness is blocked.\n- [WARN] aleo.workflow.execute: Execution workflow validation is a documented extension point. Use mock mode or add a project-specific runner.`;
+const plainTextReport = `Aleo zero-knowledge development readiness: partially ready, with follow-up actions.\nZK readiness: compile=pass execute=pass proof=warn verify=warn\nAleo Dev Doctor Report (2026-03-17T10:00:00.000Z)\nSummary: 8 pass, 4 warn, 0 fail, 0 skip\n\n- [PASS] aleo.leo.version: Leo detected: leo 1.12.0.\n- [PASS] aleo.leo.build: Leo fixture compiled successfully.\n- [PASS] aleo.leo.run: Leo run completed successfully.\n- [PASS] aleo.zk.execute: Sample program execution inputs are present for Aleo ZK workflow validation.\n- [WARN] aleo.zk.proof: Proof generation is mock-structured but waiting on a built fixture artifact.\n- [WARN] aleo.zk.verify: Verification readiness is placeholder-only until execution inputs are documented.\n- [PASS] aleo.snarkos.binary: snarkOS detected: snarkos 3.3.1.\n- [PASS] aleo.snarkos.rpc: snarkOS RPC returned an Aleo-like response structure.`;
 
 const jsonReport = {
   chain: 'aleo',
-  generatedAt: '2026-03-16T10:00:00.000Z',
-  summary: { pass: 6, warn: 3, fail: 0, skip: 0, total: 9 },
+  generatedAt: '2026-03-17T10:00:00.000Z',
+  summary: { pass: 8, warn: 4, fail: 0, skip: 0, total: 12 },
+  zkReadiness: {
+    compile: 'pass',
+    execution: 'pass',
+    proof: 'warn',
+    verification: 'warn'
+  },
   results: [
     {
-      checkId: 'aleo.toolchain.leo',
+      checkId: 'aleo.leo.build',
       status: 'pass',
-      message: 'leo detected and ready: leo 1.12.0.',
+      message: 'Leo fixture compiled successfully.',
       details: {
-        command: 'leo',
-        configuredBinaryPath: null,
-        version: 'leo 1.12.0'
+        fixturePath: 'fixtures/sample-program',
+        command: 'leo build'
       }
     },
     {
-      checkId: 'aleo.account.readiness',
+      checkId: 'aleo.zk.proof',
       status: 'warn',
-      message: 'Aleo account configuration is incomplete. Missing ALEO_PRIVATE_KEY, ALEO_ADDRESS.',
+      message: 'Proof generation is mock-structured but waiting on a built fixture artifact.',
       details: {
-        privateKeyEnvVar: 'ALEO_PRIVATE_KEY',
-        addressEnvVar: 'ALEO_ADDRESS',
-        viewKeyEnvVar: 'ALEO_VIEW_KEY',
-        hasPrivateKey: false,
-        hasAddress: false,
-        hasViewKey: false
-      }
-    },
-    {
-      checkId: 'aleo.workflow.execute',
-      status: 'warn',
-      message: 'Execution workflow validation is a documented extension point. Use mock mode or add a project-specific runner.',
-      details: {
-        fixturePath: 'examples/aleo-workflow',
-        fixtureDocumented: true,
-        executionMode: 'placeholder',
-        mockEnvVar: 'ALEO_DOCTOR_MOCK_EXECUTE',
+        fixturePath: 'fixtures/sample-program',
+        buildArtifactsPresent: false,
         placeholder: true
       }
+    },
+    {
+      checkId: 'aleo.snarkos.rpc',
+      status: 'pass',
+      message: 'snarkOS RPC returned an Aleo-like response structure.',
+      details: {
+        network: 'testnet',
+        url: 'https://api.explorer.aleo.org/v1',
+        status: 200,
+        semanticMatch: true
+      }
     }
-  ]
+  ],
+  layers: {
+    leo: [
+      {
+        checkId: 'aleo.leo.build',
+        status: 'pass'
+      }
+    ],
+    zk: [
+      {
+        checkId: 'aleo.zk.proof',
+        status: 'warn'
+      }
+    ],
+    snarkos: [
+      {
+        checkId: 'aleo.snarkos.rpc',
+        status: 'pass'
+      }
+    ],
+    account: [
+      {
+        checkId: 'aleo.account.transaction',
+        status: 'warn'
+      }
+    ],
+    program: [
+      {
+        checkId: 'aleo.program.artifacts',
+        status: 'warn'
+      }
+    ],
+    foundation: [
+      {
+        checkId: 'aleo.env.node',
+        status: 'pass'
+      }
+    ]
+  }
 };
+
+const demoNote =
+  'This demo is a static proposal/demo UI and uses sample/hardcoded report data. It does not run local diagnostics in the browser.';
 
 export default function Page() {
   return (
@@ -68,7 +115,7 @@ export default function Page() {
           Open-source diagnostics toolkit for validating Aleo zero-knowledge development environments.
         </Typography>
 
-        <Alert severity="info">This demo uses sample report data and does not execute local CLI checks in-browser.</Alert>
+        <Alert severity="info">{demoNote}</Alert>
 
         <Paper sx={{ p: 3 }}>
           <Stack spacing={2}>
@@ -85,7 +132,7 @@ export default function Page() {
           <Stack spacing={1}>
             <Typography variant="h6">Example CLI Usage</Typography>
             <Typography component="pre" sx={{ m: 0, whiteSpace: 'pre-wrap' }}>
-              {`aleo-doctor env\naleo-doctor workflow\naleo-doctor report\naleo-doctor report --json`}
+              {`aleo-doctor env\naleo-doctor zk\naleo-doctor workflow\naleo-doctor report\naleo-doctor report --json`}
             </Typography>
           </Stack>
         </Paper>

@@ -8,6 +8,7 @@ export const configCheck: DoctorCheck = {
   title: 'Aleo config validation',
   category: 'config',
   description: 'Loads and validates Aleo zero-knowledge developer environment configuration.',
+  layer: 'foundation',
   async run(context) {
     const startedAt = Date.now();
 
@@ -23,13 +24,15 @@ export const configCheck: DoctorCheck = {
           rpcUrl: config.network.rpcUrl,
           timeoutMs: config.network.timeoutMs,
           fixturePath: config.workflow.fixturePath,
+          runArgs: config.workflow.runArgs,
           leoBinaryPath: config.toolchain.leoBinaryPath ?? null,
           snarkosBinaryPath: config.toolchain.snarkosBinaryPath ?? null
-        }
+        },
+        'foundation'
       );
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Configuration could not be parsed.';
-      return createResult('aleo.config.schema', 'fail', message, Date.now() - startedAt);
+      return createResult('aleo.config.schema', 'fail', message, Date.now() - startedAt, undefined, 'foundation');
     }
   }
 };

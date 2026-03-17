@@ -60,6 +60,7 @@ function isSupportedCommand(value: string | undefined): value is CommandInput['c
     value === 'network' ||
     value === 'wallet' ||
     value === 'workflow' ||
+    value === 'zk' ||
     value === 'report'
   );
 }

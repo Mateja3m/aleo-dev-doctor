@@ -13,7 +13,8 @@ describe('config validation', () => {
       const config = loadAleoDoctorConfig(cwd);
       expect(config.chain).toBe('aleo');
       expect(config.network.rpcUrl.length).toBeGreaterThan(0);
-      expect(config.workflow.fixturePath).toBe('examples/aleo-workflow');
+      expect(config.workflow.fixturePath).toBe('fixtures/sample-program');
+      expect(config.workflow.runArgs).toEqual(['run', 'main', '5u32']);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -36,7 +37,8 @@ describe('config validation', () => {
       expect(config.network.name).toBe('mainnet');
       expect(config.network.timeoutMs).toBe(5000);
       expect(config.account.privateKeyEnvVar).toBe('ALEO_PRIVATE_KEY');
-      expect(config.workflow.fixturePath).toBe('examples/aleo-workflow');
+      expect(config.workflow.fixturePath).toBe('fixtures/sample-program');
+      expect(config.workflow.runArgs).toEqual(['run', 'main', '5u32']);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

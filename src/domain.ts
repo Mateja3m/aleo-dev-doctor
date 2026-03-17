@@ -21,6 +21,7 @@ export interface AleoDoctorConfig {
   workflow: {
     fixturePath: string;
     compileArgs: string[];
+    runArgs: string[];
     executionMode: 'placeholder' | 'mock';
   };
 }
@@ -31,7 +32,7 @@ export interface CommandFlags {
 }
 
 export interface CommandInput {
-  command: 'env' | 'config' | 'network' | 'wallet' | 'workflow' | 'report';
+  command: 'env' | 'config' | 'network' | 'wallet' | 'workflow' | 'zk' | 'report';
   flags: CommandFlags;
 }
 
@@ -47,6 +48,7 @@ export interface DoctorCheckResult {
   message: string;
   details?: Record<string, unknown>;
   durationMs: number;
+  layer?: DoctorLayer;
 }
 
 export interface DoctorContext {
@@ -63,8 +65,11 @@ export interface DoctorCheck {
   title: string;
   category: string;
   description: string;
+  layer: DoctorLayer;
   run(context: DoctorContext): Promise<DoctorCheckResult>;
 }
+
+export type DoctorLayer = 'foundation' | 'leo' | 'zk' | 'snarkos' | 'account' | 'program';
 
 export interface DoctorSummary {
   pass: number;
@@ -79,6 +84,13 @@ export interface DoctorReport {
   generatedAt: string;
   summary: DoctorSummary;
   results: DoctorCheckResult[];
+  layers: Record<DoctorLayer, DoctorCheckResult[]>;
+  zkReadiness: {
+    compile: CheckStatus;
+    execution: CheckStatus;
+    proof: CheckStatus;
+    verification: CheckStatus;
+  };
 }
 
 export interface ProcessLike {
@@ -91,11 +103,15 @@ export function createResult(
   status: CheckStatus,
   message: string,
   durationMs: number,
-  details?: Record<string, unknown>
+  details?: Record<string, unknown>,
+  layer?: DoctorLayer
 ): DoctorCheckResult {
   const base: DoctorCheckResult = { checkId, status, message, durationMs };
   if (details) {
     base.details = details;
+  }
+  if (layer) {
+    base.layer = layer;
   }
   return base;
 }

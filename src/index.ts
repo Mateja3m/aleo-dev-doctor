@@ -5,6 +5,7 @@ export { listAleoCheckIds } from './checks/index.js';
 export { createDoctorReport } from './reporting/create-report.js';
 export type {
   AleoDoctorConfig,
+  DoctorLayer,
   CommandInput,
   CommandResult,
   DoctorCheck,

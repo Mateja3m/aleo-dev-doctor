@@ -1,0 +1,6 @@
+{
+  "program": "sample_program.aleo",
+  "version": "0.1.0",
+  "description": "Minimal Aleo sample program fixture for development lifecycle validation.",
+  "license": "MIT"
+}

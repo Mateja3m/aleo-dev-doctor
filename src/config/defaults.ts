@@ -14,8 +14,9 @@ export const DEFAULT_CONFIG: AleoDoctorConfig = {
     viewKeyEnvVar: 'ALEO_VIEW_KEY'
   },
   workflow: {
-    fixturePath: 'examples/aleo-workflow',
+    fixturePath: 'fixtures/sample-program',
     compileArgs: ['build'],
+    runArgs: ['run', 'main', '5u32'],
     executionMode: 'placeholder'
   }
 };

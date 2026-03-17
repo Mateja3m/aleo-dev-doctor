@@ -1,9 +1,9 @@
 import { execFile } from 'node:child_process';
-import { access } from 'node:fs/promises';
+import { access, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 
-import type { AleoDoctorConfig, DoctorContext } from '../domain.js';
+import type { AleoDoctorConfig, CheckStatus, DoctorContext } from '../domain.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -70,4 +70,51 @@ export async function fileExists(filePath: string): Promise<boolean> {
 
 export function formatPathForDetails(cwd: string, targetPath: string): string {
   return path.relative(cwd, targetPath) || '.';
+}
+
+export async function findFilesByExtension(rootPath: string, extension: string): Promise<string[]> {
+  const matches: string[] = [];
+  await walk(rootPath, matches, extension);
+  return matches;
+}
+
+async function walk(rootPath: string, matches: string[], extension: string): Promise<void> {
+  const entries = await readdir(rootPath, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(rootPath, entry.name);
+    if (entry.isDirectory()) {
+      await walk(fullPath, matches, extension);
+      continue;
+    }
+
+    if (entry.isFile() && entry.name.endsWith(extension)) {
+      matches.push(fullPath);
+    }
+  }
+}
+
+export async function directoryExists(targetPath: string): Promise<boolean> {
+  try {
+    const target = await stat(targetPath);
+    return target.isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+export function summarizeStatuses(statuses: CheckStatus[]): CheckStatus {
+  if (statuses.includes('fail')) {
+    return 'fail';
+  }
+
+  if (statuses.includes('warn')) {
+    return 'warn';
+  }
+
+  if (statuses.includes('skip')) {
+    return 'skip';
+  }
+
+  return 'pass';
 }

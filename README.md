@@ -1,63 +1,72 @@
 # Aleo Dev Doctor
 
-Open-source diagnostics toolkit for validating Aleo zero-knowledge development environments.
+Aleo ZK Development Readiness Validator.
 
-`aleo-doctor` helps developers building privacy-first Aleo apps verify that their local toolchain, RPC access, account configuration, and Leo workflow setup are ready before they lose time on avoidable environment issues.
+## Overview
 
-## Problem
+`Aleo Dev Doctor`, published as `@idoa/dev-doctor-aleo` and exposed through the `aleo-doctor` CLI, validates whether a machine and project are ready for the Aleo development lifecycle:
 
-Aleo onboarding is not just about installing Node.js and running a template.
+`compile -> execute -> generate proof -> verify -> interact with network`
 
-Zero-knowledge developers typically need to validate multiple layers before productive work can start:
+The CLI is Aleo-native rather than generic. It is focused on:
 
-- the Leo compiler must be available
-- `snarkos` should be installed for protocol-adjacent local workflows
-- RPC access must point at a valid Aleo endpoint
-- account-related environment variables must be present without leaking secrets
-- compile and execution workflows need at least a baseline readiness check
+- Leo compiler readiness
+- zero-knowledge workflow validation
+- snarkOS RPC semantics
+- Aleo account readiness
+- per-program artifact validation
 
-Without a focused validator, new Aleo developers end up debugging shell paths, malformed config, missing account variables, and broken workflow assumptions one issue at a time.
+The project keeps the existing modular dev-doctor architecture and extends it with an Aleo adapter layer. It validates readiness, not the full proving or execution engine.
 
-## Why Aleo Developers Need This
+## What It Validates
 
-`aleo-doctor` is positioned as a developer enablement tool for the Aleo ecosystem:
+### Leo Toolchain
 
-- speeds up zero-knowledge developer onboarding
-- reduces setup friction for Leo and snarkOS-based workflows
-- creates a consistent readiness report for local environments and demos
-- supports privacy-first application teams that want safe diagnostics without exposing secrets
-- provides a clean adapter layer that can grow into deeper Aleo workflow validation over time
+- `leo --version`
+- `leo build` against a sample fixture
+- `leo run` against the same fixture
 
-## Aleo Stack Validation
+### ZK Workflow
 
-The CLI keeps the existing TypeScript-first adapter architecture and adds explicit Aleo-native checks.
+- execution input readiness
+- proof generation readiness with safe mocks
+- verification readiness with safe mocks
 
-Supported checks today:
+### snarkOS
 
-- `aleo.env.node`: Node.js runtime compatibility
-- `aleo.env.npm`: npm availability for package installation and demo setup
-- `aleo.toolchain.leo`: Leo compiler detection and version capture
-- `aleo.toolchain.snarkos`: snarkOS detection and version capture
-- `aleo.config.schema`: Aleo-specific config parsing and defaults validation
-- `aleo.network.rpc`: RPC URL validation and lightweight reachability test
-- `aleo.account.readiness`: account environment readiness without exposing secrets
-- `aleo.workflow.compile`: fixture-driven Leo compile validation with safe mock mode
-- `aleo.workflow.execute`: lightweight execution workflow extension point
+- snarkOS binary detection
+- RPC endpoint reachability
+- RPC response semantics, not just HTTP status
+
+### Account Readiness
+
+- Aleo private key presence and format shape
+- Aleo address readiness
+- transaction dry-run readiness without submitting a real transaction
+
+### Program Validation
+
+- scan compiled `.aleo` artifacts
+- validate whether the sample program produced build output
 
 ## Quick Start
 
 The CLI runs real checks against the local machine and local/project configuration.
-
-If you are working inside this repository, use:
 
 ```bash
 npm install
 npm run doctor -- report
 ```
 
-## CLI Commands
+The demo app is separate and uses sample/hardcoded report data. It does not run local diagnostics in the browser.
 
-These commands are the actual CLI surface exposed by the package:
+## Example Usage
+
+```bash
+aleo-doctor report
+```
+
+Available CLI commands:
 
 ```bash
 aleo-doctor env
@@ -65,92 +74,186 @@ aleo-doctor config
 aleo-doctor network
 aleo-doctor wallet
 aleo-doctor workflow
+aleo-doctor zk
 aleo-doctor report
 aleo-doctor report --json
 ```
 
-What each command checks:
+Command intent:
 
-- `aleo-doctor env`: checks Node.js, npm, Leo compiler availability, and snarkOS availability.
-- `aleo-doctor config`: loads `aleo-doctor.config.json`, applies defaults, and validates Aleo-specific config fields.
-- `aleo-doctor network`: validates the configured Aleo RPC URL and performs a lightweight reachability request.
-- `aleo-doctor wallet`: checks Aleo account-related environment variable readiness without printing secret values.
-- `aleo-doctor workflow`: validates the Aleo workflow fixture compile path and reports the execution extension point status.
-- `aleo-doctor report`: runs all checks and produces a combined Aleo development readiness report.
-- `aleo-doctor report --json`: runs the full report and outputs structured JSON for CI or integrations.
+- `aleo-doctor env`: validates Node.js, npm, Leo detection, and snarkOS detection.
+- `aleo-doctor config`: validates Aleo-specific config fields and defaults.
+- `aleo-doctor network`: validates snarkOS RPC reachability and payload semantics.
+- `aleo-doctor wallet`: validates account key readiness and transaction dry-run readiness.
+- `aleo-doctor workflow`: validates compile, run, proof, verify, and program artifact flow.
+- `aleo-doctor zk`: runs only the ZK workflow checks.
+- `aleo-doctor report`: runs the full Aleo development lifecycle validator.
+- `aleo-doctor report --json`: emits structured JSON for CI or integrations.
 
-## Example Terminal Output
+## Output Examples
+
+Terminal example:
 
 ```text
 Aleo zero-knowledge development readiness: partially ready, with follow-up actions.
-Aleo Dev Doctor Report (2026-03-15T10:00:00.000Z)
-Summary: 6 pass, 3 warn, 0 fail, 0 skip
+ZK readiness: compile=pass execute=pass proof=warn verify=warn
+Aleo Dev Doctor Report (2026-03-17T10:00:00.000Z)
+Summary: 8 pass, 4 warn, 0 fail, 0 skip
 
-- [PASS] aleo.env.node: Node.js 22.14.0 is ready for Aleo developer tooling.
-- [PASS] aleo.toolchain.leo: leo detected and ready: leo 1.12.0.
-- [PASS] aleo.toolchain.snarkos: snarkos detected and ready: snarkos 3.3.1.
-- [PASS] aleo.network.rpc: Aleo testnet RPC endpoint is reachable.
-- [PASS] aleo.account.readiness: Aleo account configuration is present for privacy-first app development.
-- [WARN] aleo.workflow.execute: Execution workflow validation is a documented extension point. Use mock mode or add a project-specific runner.
+- [PASS] aleo.leo.version: Leo detected: leo 1.12.0.
+- [PASS] aleo.leo.build: Leo fixture compiled successfully.
+- [PASS] aleo.leo.run: Leo run completed successfully.
+- [PASS] aleo.zk.execute: Sample program execution inputs are present for Aleo ZK workflow validation.
+- [WARN] aleo.zk.proof: Proof generation is mock-structured but waiting on a built fixture artifact.
+- [WARN] aleo.zk.verify: Verification readiness is placeholder-only until execution inputs are documented.
+- [PASS] aleo.snarkos.binary: snarkOS detected: snarkos 3.3.1.
+- [PASS] aleo.snarkos.rpc: snarkOS RPC returned an Aleo-like response structure.
 ```
 
-## Example JSON Output
+JSON example:
 
 ```json
 {
   "chain": "aleo",
-  "generatedAt": "2026-03-15T10:00:00.000Z",
   "summary": {
-    "pass": 6,
-    "warn": 3,
+    "pass": 8,
+    "warn": 4,
     "fail": 0,
     "skip": 0,
-    "total": 9
+    "total": 12
   },
-  "results": [
-    {
-      "checkId": "aleo.toolchain.leo",
-      "status": "pass",
-      "message": "leo detected and ready: leo 1.12.0.",
-      "durationMs": 14,
-      "details": {
-        "command": "leo",
-        "configuredBinaryPath": null,
-        "version": "leo 1.12.0"
+  "zkReadiness": {
+    "compile": "pass",
+    "execution": "pass",
+    "proof": "warn",
+    "verification": "warn"
+  },
+  "layers": {
+    "leo": [
+      {
+        "checkId": "aleo.leo.build",
+        "status": "pass",
+        "message": "Leo fixture compiled successfully."
       }
-    },
-    {
-      "checkId": "aleo.account.readiness",
-      "status": "pass",
-      "message": "Aleo account configuration is present for privacy-first app development.",
-      "durationMs": 2,
-      "details": {
-        "privateKeyEnvVar": "ALEO_PRIVATE_KEY",
-        "addressEnvVar": "ALEO_ADDRESS",
-        "viewKeyEnvVar": "ALEO_VIEW_KEY",
-        "hasPrivateKey": true,
-        "hasAddress": true,
-        "hasViewKey": false
+    ],
+    "zk": [
+      {
+        "checkId": "aleo.zk.proof",
+        "status": "warn",
+        "message": "Proof generation is mock-structured but waiting on a built fixture artifact."
       }
-    },
-    {
-      "checkId": "aleo.workflow.compile",
-      "status": "warn",
-      "message": "Leo fixture is present, but the Leo compiler is not installed. Compile readiness is blocked.",
-      "durationMs": 5,
-      "details": {
-        "fixturePath": "examples/aleo-workflow",
-        "command": "leo build",
-        "configuredBinaryPath": null
+    ],
+    "snarkos": [
+      {
+        "checkId": "aleo.snarkos.rpc",
+        "status": "pass",
+        "message": "snarkOS RPC returned an Aleo-like response structure."
       }
-    }
-  ]
+    ],
+    "account": [
+      {
+        "checkId": "aleo.account.transaction",
+        "status": "warn",
+        "message": "Transaction readiness is incomplete. Provide a valid Aleo address and private key."
+      }
+    ],
+    "program": [
+      {
+        "checkId": "aleo.program.artifacts",
+        "status": "warn",
+        "message": "No compiled `.aleo` artifacts were found yet. Run the Leo build step to validate per-program output."
+      }
+    ]
+  }
 }
 ```
 
-## Configuration
+## Aleo Diagnostics Coverage
 
-Default config values are Aleo-specific and safe to override.
+| Layer | Check IDs | Purpose |
+| --- | --- | --- |
+| Foundation | `aleo.env.node`, `aleo.env.npm`, `aleo.config.schema` | Validate runtime and config prerequisites |
+| Leo | `aleo.leo.version`, `aleo.leo.build`, `aleo.leo.run` | Validate Leo installation, compile, and run flow |
+| ZK | `aleo.zk.execute`, `aleo.zk.proof`, `aleo.zk.verify` | Validate execution, proof, and verification readiness |
+| snarkOS | `aleo.snarkos.binary`, `aleo.snarkos.rpc` | Validate snarkOS installation and RPC semantics |
+| Account | `aleo.account.private_key`, `aleo.account.transaction` | Validate keys and transaction readiness without exposing secrets |
+| Program | `aleo.program.artifacts` | Validate compiled Aleo program artifacts |
+
+## CI Integration Example
+
+```yaml
+name: aleo-dev-doctor-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+      - run: npm run doctor -- report --json
+        env:
+          ALEO_DOCTOR_MOCK_COMPILE: pass
+          ALEO_DOCTOR_MOCK_RUN: pass
+          ALEO_DOCTOR_MOCK_EXECUTE: pass
+          ALEO_DOCTOR_MOCK_PROOF: pass
+          ALEO_DOCTOR_MOCK_VERIFY: pass
+```
+
+## Project Structure
+
+```text
+src/
+  checks/
+    env.checks.ts
+    leo.check.ts
+    zk-workflow.check.ts
+    snarkos.check.ts
+    account.check.ts
+    program.check.ts
+  commands/
+  config/
+  reporting/
+fixtures/
+  sample-program/
+demo/
+```
+
+Structure intent:
+
+- `src/checks`: pluggable Aleo diagnostics modules
+- `src/commands`: CLI command execution
+- `src/config`: Aleo config defaults and zod validation
+- `src/reporting`: terminal and JSON report shaping
+- `fixtures/sample-program`: lightweight fixture for compile, run, and workflow readiness
+- `demo`: static showcase UI with sample/hardcoded data
+
+## Fixture Workflow
+
+`fixtures/sample-program/` is used for:
+
+- compile test
+- run test
+- ZK execution validation
+- proof readiness scaffolding
+- verification readiness scaffolding
+
+Expected commands:
+
+```bash
+leo build
+leo run main 5u32
+```
+
+## Configuration
 
 Example `aleo-doctor.config.json`:
 
@@ -172,69 +275,31 @@ Example `aleo-doctor.config.json`:
     "viewKeyEnvVar": "ALEO_VIEW_KEY"
   },
   "workflow": {
-    "fixturePath": "examples/aleo-workflow",
+    "fixturePath": "fixtures/sample-program",
     "compileArgs": ["build"],
+    "runArgs": ["run", "main", "5u32"],
     "executionMode": "placeholder"
   }
 }
 ```
 
-Environment variables:
+Optional environment variables:
 
 ```bash
 ALEO_RPC_URL=https://api.explorer.aleo.org/v1
 ALEO_NETWORK=testnet
-ALEO_PRIVATE_KEY=...
-ALEO_ADDRESS=...
-ALEO_VIEW_KEY=...
-ALEO_DOCTOR_MOCK_COMPILE=pass
-ALEO_DOCTOR_MOCK_EXECUTE=pass
-```
-
-Which environment variables are actually required:
-
-- None are required to run the test suite or to execute the CLI.
-- `ALEO_RPC_URL` is useful if you want to point network checks to a different Aleo endpoint.
-- `ALEO_PRIVATE_KEY` and `ALEO_ADDRESS` are needed only if you want `aleo.account.readiness` to pass.
-- `ALEO_VIEW_KEY` is optional.
-- `ALEO_DOCTOR_MOCK_COMPILE` and `ALEO_DOCTOR_MOCK_EXECUTE` are optional helper flags for CI and demos.
-
-## Fixture Example
-
-[`examples/aleo-workflow/`](/Users/milanmatejic/Desktop/personal/Projects/aleo-dev-doctor/examples/aleo-workflow/README.md) is a minimal Aleo workflow fixture that uses a Leo sample program for `aleo.workflow.compile`.
-
-Expected command:
-
-```bash
-leo build
-```
-
-If real compilation is too heavy or unavailable in CI, the workflow checks support safe mockable modes through:
-
-- `ALEO_DOCTOR_MOCK_COMPILE=pass|fail`
-- `ALEO_DOCTOR_MOCK_EXECUTE=pass|fail`
-
-## Current Limitations
-
-- RPC reachability is lightweight and does not yet validate deeper Aleo protocol semantics.
-- The execution workflow check is intentionally a placeholder extension point, not a full transaction runner.
-- The fixture example is meant for readiness validation, not for managing full Leo project lifecycles.
-- Secret material is never printed, but the tool currently validates presence rather than cryptographic correctness.
-- The current default endpoint may respond as reachable but not behave like a full RPC surface for every request path, so warnings like HTTP `404` are possible without indicating a broken CLI.
-
-## Local Development
-
-```bash
-npm install
-npm run build
-npm run lint
-npm run test
-npm run typecheck
+ALEO_PRIVATE_KEY=
+ALEO_ADDRESS=
+ALEO_VIEW_KEY=
+ALEO_DOCTOR_MOCK_COMPILE=
+ALEO_DOCTOR_MOCK_RUN=
+ALEO_DOCTOR_MOCK_EXECUTE=
+ALEO_DOCTOR_MOCK_PROOF=
+ALEO_DOCTOR_MOCK_VERIFY=
+ALEO_DOCTOR_MOCK_TX_READY=
 ```
 
 ## Demo App
-
-The demo app is a static proposal/demo UI and uses sample/hardcoded report data. It does not run local diagnostics in the browser.
 
 To start the demo app from this repository:
 

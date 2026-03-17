@@ -4,10 +4,11 @@ Usage:
   aleo-doctor <command> [--json] [--config <path>]
 
 Commands:
-  env      Validate Aleo toolchain readiness
+  env      Validate runtime, Leo, and snarkOS toolchain readiness
   config   Validate Aleo developer config
-  network  Validate Aleo RPC endpoint format and reachability
-  wallet   Validate Aleo account environment readiness
-  workflow Validate Leo compile readiness and execution extension points
-  report   Run the full Aleo development readiness report
+  network  Validate snarkOS RPC reachability and semantics
+  wallet   Validate Aleo account key and transaction readiness
+  workflow Validate compile, run, proof, verify, and program artifacts
+  zk       Run only ZK workflow readiness checks
+  report   Run the full Aleo development lifecycle report
 `;

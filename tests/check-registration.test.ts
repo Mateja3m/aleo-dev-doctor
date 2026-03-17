@@ -7,13 +7,18 @@ describe('Aleo check registration', () => {
     expect(listAleoCheckIds()).toEqual([
       'aleo.env.node',
       'aleo.env.npm',
-      'aleo.toolchain.leo',
-      'aleo.toolchain.snarkos',
       'aleo.config.schema',
-      'aleo.network.rpc',
-      'aleo.account.readiness',
-      'aleo.workflow.compile',
-      'aleo.workflow.execute'
+      'aleo.leo.version',
+      'aleo.leo.build',
+      'aleo.leo.run',
+      'aleo.zk.execute',
+      'aleo.zk.proof',
+      'aleo.zk.verify',
+      'aleo.snarkos.binary',
+      'aleo.snarkos.rpc',
+      'aleo.account.private_key',
+      'aleo.account.transaction',
+      'aleo.program.artifacts'
     ]);
   });
 });
