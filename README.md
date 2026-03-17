@@ -44,32 +44,15 @@ Supported checks today:
 - `aleo.workflow.compile`: fixture-driven Leo compile validation with safe mock mode
 - `aleo.workflow.execute`: lightweight execution workflow extension point
 
-## CLI Usage
+## Quick Start
 
-Published usage:
+The CLI runs real checks against the local machine and local/project configuration.
 
-```bash
-npx @idoa/dev-doctor-aleo report
-```
-
-Local usage in this repository:
+If you are working inside this repository, use:
 
 ```bash
 npm install
-npm run doctor -- env
 npm run doctor -- report
-npm run doctor -- report --json
-npm run doctor -- workflow
-```
-
-Linked binary usage:
-
-```bash
-npm link
-aleo-doctor env
-aleo-doctor report
-aleo-doctor report --json
-aleo-doctor workflow
 ```
 
 ## Example Commands
@@ -83,6 +66,16 @@ aleo-doctor workflow
 aleo-doctor report
 aleo-doctor report --json
 ```
+
+What each command checks:
+
+- `aleo-doctor env`: checks Node.js, npm, Leo compiler availability, and snarkOS availability.
+- `aleo-doctor config`: loads `aleo-doctor.config.json`, applies defaults, and validates Aleo-specific config fields.
+- `aleo-doctor network`: validates the configured Aleo RPC URL and performs a lightweight reachability request.
+- `aleo-doctor wallet`: checks Aleo account-related environment variable readiness without printing secret values.
+- `aleo-doctor workflow`: validates the Aleo workflow fixture compile path and reports the execution extension point status.
+- `aleo-doctor report`: runs all checks and produces a combined Aleo development readiness report.
+- `aleo-doctor report --json`: runs the full report and outputs structured JSON for CI or integrations.
 
 ## Example Terminal Output
 
@@ -196,6 +189,14 @@ ALEO_DOCTOR_MOCK_COMPILE=pass
 ALEO_DOCTOR_MOCK_EXECUTE=pass
 ```
 
+Which environment variables are actually required:
+
+- None are required to run the test suite or to execute the CLI.
+- `ALEO_RPC_URL` is useful if you want to point network checks to a different Aleo endpoint.
+- `ALEO_PRIVATE_KEY` and `ALEO_ADDRESS` are needed only if you want `aleo.account.readiness` to pass.
+- `ALEO_VIEW_KEY` is optional.
+- `ALEO_DOCTOR_MOCK_COMPILE` and `ALEO_DOCTOR_MOCK_EXECUTE` are optional helper flags for CI and demos.
+
 ## Fixture Example
 
 [`examples/aleo-workflow/`](/Users/milanmatejic/Desktop/personal/Projects/aleo-dev-doctor/examples/aleo-workflow/README.md) is a minimal Aleo workflow fixture that uses a Leo sample program for `aleo.workflow.compile`.
@@ -217,19 +218,27 @@ If real compilation is too heavy or unavailable in CI, the workflow checks suppo
 - The execution workflow check is intentionally a placeholder extension point, not a full transaction runner.
 - The fixture example is meant for readiness validation, not for managing full Leo project lifecycles.
 - Secret material is never printed, but the tool currently validates presence rather than cryptographic correctness.
+- The current default endpoint may respond as reachable but not behave like a full RPC surface for every request path, so warnings like HTTP `404` are possible without indicating a broken CLI.
 
 ## Local Development
 
 ```bash
+npm install
 npm run build
 npm run lint
 npm run test
 npm run typecheck
 ```
 
-Demo app:
+## Demo App
+
+The demo app is a static proposal/demo UI. It shows sample Aleo Dev Doctor output and does not run local diagnostics in the browser.
+
+To start the demo app:
 
 ```bash
 npm --prefix demo install
 npm --prefix demo run dev
 ```
+
+Then open `http://localhost:3000`.

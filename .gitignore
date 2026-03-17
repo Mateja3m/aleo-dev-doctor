@@ -58,3 +58,4 @@ temp/
 # Tooling caches
 .turbo/
 .next/
+.npm-cache/
