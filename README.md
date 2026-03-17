@@ -54,8 +54,7 @@ The project keeps the existing modular dev-doctor architecture and extends it wi
 The CLI runs real checks against the local machine and local/project configuration.
 
 ```bash
-npm install
-npm run doctor -- report
+npx @idoa/dev-doctor-aleo report
 ```
 
 The demo app is separate and uses sample/hardcoded report data. It does not run local diagnostics in the browser.
@@ -178,6 +177,27 @@ JSON example:
 | snarkOS | `aleo.snarkos.binary`, `aleo.snarkos.rpc` | Validate snarkOS installation and RPC semantics |
 | Account | `aleo.account.private_key`, `aleo.account.transaction` | Validate keys and transaction readiness without exposing secrets |
 | Program | `aleo.program.artifacts` | Validate compiled Aleo program artifacts |
+
+## Current Status
+
+This repository represents a working Proof-of-Concept (PoC).
+
+Current capabilities include:
+
+- CLI structure and command system
+- baseline Aleo-aware diagnostics
+- Leo build and run checks
+- sample fixture workflow
+- JSON and terminal reporting
+
+Limitations:
+
+- ZK workflow validation is currently based on readiness heuristics
+- proof and verification checks are not fully artifact-aware
+- limited fixture coverage
+- partial semantic validation for snarkOS and accounts
+
+The next development phase focuses on deepening Aleo-specific diagnostics.
 
 ## CI Integration Example
 
