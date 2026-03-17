@@ -55,7 +55,9 @@ npm install
 npm run doctor -- report
 ```
 
-## Example Commands
+## CLI Commands
+
+These commands are the actual CLI surface exposed by the package:
 
 ```bash
 aleo-doctor env
@@ -232,9 +234,9 @@ npm run typecheck
 
 ## Demo App
 
-The demo app is a static proposal/demo UI. It shows sample Aleo Dev Doctor output and does not run local diagnostics in the browser.
+The demo app is a static proposal/demo UI and uses sample/hardcoded report data. It does not run local diagnostics in the browser.
 
-To start the demo app:
+To start the demo app from this repository:
 
 ```bash
 npm --prefix demo install
