@@ -218,21 +218,6 @@ If real compilation is too heavy or unavailable in CI, the workflow checks suppo
 - The fixture example is meant for readiness validation, not for managing full Leo project lifecycles.
 - Secret material is never printed, but the tool currently validates presence rather than cryptographic correctness.
 
-## Grant-Aligned Roadmap
-
-- add deeper Leo project introspection and richer compile diagnostics
-- expand snarkOS validation for local node scenarios without turning this project into a node manager
-- support project-specific execution validators for privacy app teams
-- add more ecosystem-specific checks for prover inputs, endpoint expectations, and CI onboarding
-- publish the package and demo as an open-source Aleo developer onboarding utility
-
-## Open Source Links
-
-- npm package: `TODO`
-- demo app: `TODO`
-- documentation: [docs/README.md](/Users/milanmatejic/Desktop/personal/Projects/aleo-dev-doctor/docs/README.md)
-- repository: [github.com/Mateja3m/aleo-dev-doctor](https://github.com/Mateja3m/aleo-dev-doctor)
-
 ## Local Development
 
 ```bash
